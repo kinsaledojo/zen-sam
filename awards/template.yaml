@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  Sample SAM Template for sam-app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Parameters:
+  CustomDomain:
+    Description: The Custom Domain linked to this Stack
+    Type: String
+    Default: api.coderdojokinsale.com
+Resources:
+  ##########################################################################
+  #   API Gateway                                                          #
+  ##########################################################################
+  ZenAwardsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      AccessLogSetting:
+        DestinationArn: !GetAtt ZenAwardsApiLogGroup.Arn
+        Format: "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"user\":\"$context.identity.user\",\"caller\":\"$context.identity.caller\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"resourcePath\":\"$context.resourcePath\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: './RestAPIs/openapi.yaml'
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - HttpMethod: '*'
+          LoggingLevel: INFO
+          ResourcePath: '/*'
+          DataTraceEnabled: true
+      OpenApiVersion: 3.0.1
+      StageName: default
+
+  ZenAwardsApiMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      BasePath: 'v1awards'
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref ZenAwardsApi
+      Stage: !Ref ZenAwardsApi.Stage
+
+  ZenAwardsFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ZenAwardsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ZenAwardsApi}/*/GET/
+
+  ##########################################################################
+  #   Lambda Function                                                      #
+  ##########################################################################
+  ZenAwardsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: functions/hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Role: !GetAtt ZenAwardsFunctionRole.Arn
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: ZenAwards
+          POWERTOOLS_METRICS_NAMESPACE: sam-app
+          LOG_LEVEL: INFO
+      Events:
+        ZenAwards:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref ZenAwardsApi
+            Path: /hello
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - app.ts
+
+  ##########################################################################
+  #   IAM Role                                                             #
+  ##########################################################################
+  ZenAwardsFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+
+  ##########################################################################
+  #   Log Group                                                            #
+  ##########################################################################
+  ZenAwardsApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "API-Gateway-Access-Logs_${ZenAwardsApi}/default"
+      RetentionInDays: 30
+
+  ##########################################################################
+  #   Log Group                                                            #
+  ##########################################################################
+  ZenAwardsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ZenAwardsFunction}"
+      RetentionInDays: 30
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ZenAwardsApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ZenAwardsApi}.execute-api.${AWS::Region}.amazonaws.com/default/hello/"
+  ZenAwardsFunction:
+    Description: Hello World Lambda Function ARN
+    Value: !GetAtt ZenAwardsFunction.Arn
+  ZenAwardsFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value: !GetAtt ZenAwardsFunctionRole.Arn

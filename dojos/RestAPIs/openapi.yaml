@@ -1,0 +1,20 @@
+openapi: 3.0.1
+info:
+  title: Events API
+  description: Title
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /hello:
+    get:
+      operationId: "getHelloWorld"
+      responses:
+        200:
+          description: OK
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenDojosFunction.Arn}/invocations
+
