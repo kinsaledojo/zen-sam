@@ -77,12 +77,36 @@ Resources:
           POWERTOOLS_METRICS_NAMESPACE: sam-app
           LOG_LEVEL: INFO
       Events:
-        ZenAwards:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        GetAwards:
+          Type: Api
           Properties:
             RestApiId: !Ref ZenAwardsApi
-            Path: /hello
+            Path: /
             Method: get
+        CreateAward:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ZenAwardsApi
+            Path: /
+            Method: post
+        GetAward:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ZenAwardsApi
+            Path: /{id}
+            Method: get
+        UpdateAward:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ZenAwardsApi
+            Path: /{id}
+            Method: patch
+        DeleteAward:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ZenAwardsApi
+            Path: /{id}
+            Method: delete
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:

@@ -9,11 +9,6 @@ Description: >
 Globals:
   Function:
     Timeout: 3
-Parameters:
-  CustomDomain:
-    Description: The Custom Domain linked to this Stack
-    Type: String
-    Default: api.coderdojokinsale.com
 Resources:
   ZenAwardsApplication:
     Type: AWS::Serverless::Application
