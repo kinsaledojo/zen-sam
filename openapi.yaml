@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: CoderDojo API
+  description: This is a sample server for a pet store.
+  termsOfService: http://example.com/terms/
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about this API
+  url: http://api.coderdojokinsale.com
+servers:
+  - url: https://api.coderdojokinsale.com/v1
+    description: Remote
+  - url: http://localhost:8080
+    description: Local
+
+paths:
+  /awards:
+    $ref: ./awards/RestAPIs/openapi.yaml#/paths/~1
+  /awards/{id}:
+    $ref: ./awards/RestAPIs/openapi.yaml#/paths/~1{id}
+  /badges:
+    $ref: ./badges/RestAPIs/openapi.yaml#/paths/~1
+  /badges/{id}:
+    $ref: ./badges/RestAPIs/openapi.yaml#/paths/~1{id}
+  /belts:
+    $ref: ./belts/RestAPIs/openapi.yaml#/paths/~1
+  /belts/{id}:
+    $ref: ./belts/RestAPIs/openapi.yaml#/paths/~1{id}
+  /dojos:
+    $ref: ./dojos/RestAPIs/openapi.yaml#/paths/~1
+  /dojos/{id}:
+    $ref: ./dojos/RestAPIs/openapi.yaml#/paths/~1{id}
+  /events:
+    $ref: ./events/RestAPIs/openapi.yaml#/paths/~1
+  /events/{id}:
+    $ref: ./events/RestAPIs/openapi.yaml#/paths/~1{id}
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        description:
+          type: string
+    Errors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Error'
+    Success:
+      type: object
+      properties:
+        success:
+          type: object
+          properties:
+            /lights:
+              type: string
+  parameters:
+    ID:
+      name: id
+      required: true
+      in: path
+      description: ID of the resource
+      schema:
+        type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+  - name: Awards
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/
+  - name: Badges
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/
+  - name: Belts
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/
+  - name: Dojos
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/
+  - name: Events
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/

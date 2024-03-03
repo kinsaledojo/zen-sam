@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  Sample SAM Template for sam-app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Parameters:
+  CustomDomain:
+    Description: The Custom Domain linked to this Stack
+    Type: String
+    Default: api.coderdojokinsale.com
+Resources:
+  ##########################################################################
+  #   API Gateway                                                          #
+  ##########################################################################
+  ZenBadgesApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      AccessLogSetting:
+        DestinationArn: !GetAtt ZenBadgesApiLogGroup.Arn
+        Format: "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"user\":\"$context.identity.user\",\"caller\":\"$context.identity.caller\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"resourcePath\":\"$context.resourcePath\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: './RestAPIs/openapi.yaml'
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - HttpMethod: '*'
+          LoggingLevel: INFO
+          ResourcePath: '/*'
+          DataTraceEnabled: true
+      OpenApiVersion: 3.0.1
+      StageName: default
+
+  ZenBadgesApiMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      BasePath: 'v1badges'
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref ZenBadgesApi
+      Stage: !Ref ZenBadgesApi.Stage
+
+  ZenBadgesFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ZenBadgesFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ZenBadgesApi}/*/GET/
+
+  ##########################################################################
+  #   Lambda Function                                                      #
+  ##########################################################################
+  ZenBadgesFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: functions/hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Role: !GetAtt ZenBadgesFunctionRole.Arn
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: ZenBadges
+          POWERTOOLS_METRICS_NAMESPACE: sam-app
+          LOG_LEVEL: INFO
+      Events:
+        ZenBadges:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref ZenBadgesApi
+            Path: /hello
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - app.ts
+
+  ##########################################################################
+  #   IAM Role                                                             #
+  ##########################################################################
+  ZenBadgesFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+
+  ##########################################################################
+  #   Log Group                                                            #
+  ##########################################################################
+  ZenBadgesApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "API-Gateway-Access-Logs_${ZenBadgesApi}/default"
+      RetentionInDays: 30
+
+  ##########################################################################
+  #   Log Group                                                            #
+  ##########################################################################
+  ZenBadgesFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ZenBadgesFunction}"
+      RetentionInDays: 30
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ZenBadgesApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ZenBadgesApi}.execute-api.${AWS::Region}.amazonaws.com/default/hello/"
+  ZenBadgesFunction:
+    Description: Hello World Lambda Function ARN
+    Value: !GetAtt ZenBadgesFunction.Arn
+  ZenBadgesFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value: !GetAtt ZenBadgesFunctionRole.Arn

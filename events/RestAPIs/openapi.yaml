@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Events API
+  description: Title
+  termsOfService: https://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+  - url: https://api.coderdojokinsale.com/v1/events
+    description: Production
+    x-amazon-apigateway-endpoint-configuration:
+      disableExecuteApiEndpoint: true
+paths:
+  /:
+    summary: A sample summary for this `Path Object`.
+    description: A sample description for this `Path Object`.
+    get:
+      tags:
+        - "Events"
+      summary: A sample summary for this `Path Item Object`.
+      description: A sample description for this `Path Item Object`.
+      externalDocs:
+        description: External Documentation
+        url: https://www.example.com/
+      operationId: getEvents
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenEventsFunction.Arn}/invocations
+    post:
+      tags:
+        - "Events"
+      summary: A sample summary for this `Path Item Object`.
+      description: A sample description for this `Path Item Object`.
+      externalDocs:
+        description: External Documentation
+        url: https://www.example.com/
+      operationId: createEvent
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - bearerAuth: [ ]
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenEventsFunction.Arn}/invocations
+  /{id}:
+    parameters:
+      - $ref: '#/components/parameters/ID'
+    get:
+      tags:
+        - "Events"
+      summary: A sample summary for this `Path Item Object`.
+      description: A sample description for this `Path Item Object`.
+      externalDocs:
+        description: External Documentation
+        url: https://www.example.com/
+      operationId: getEventById
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenEventsFunction.Arn}/invocations
+    put:
+      tags:
+        - "Events"
+      summary: A sample summary for this `Path Item Object`.
+      description: A sample description for this `Path Item Object`.
+      externalDocs:
+        description: External Documentation
+        url: https://www.example.com/
+      operationId: updateEventById
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenEventsFunction.Arn}/invocations
+    delete:
+      tags:
+        - "Events"
+      summary: A sample summary for this `Path Item Object`.
+      description: A sample description for this `Path Item Object`.
+      externalDocs:
+        description: External Documentation
+        url: https://www.example.com/
+      operationId: deleteEventById
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws_proxy"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenEventsFunction.Arn}/invocations
+components:
+  schemas:
+    Error:
+      title: "Error Schema"
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - error
+  parameters:
+    ID:
+      name: id
+      required: true
+      in: path
+      description: ID of the resource
+      schema:
+        type: string
+  responses:
+    400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            unauthorized:
+              summary: A sample summary for this `Example Object`.
+              description: A sample description for this `Example Object`.
+              value:
+                message: Unauthorized
+    403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            forbidden:
+              summary: A sample summary for this `Example Object`.
+              description: A sample description for this `Example Object`.
+              value:
+                message: Forbidden
+    404:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    405:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    413:
+      description: Content Too Large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    415:
+      description: Unsupported Media Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    429:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    503:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    504:
+      description: Gateway Timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+tags:
+  - name: Events
+    description: A sample description for this `Tag Object`
+    externalDocs:
+      description: External Documentation
+      url: https://www.example.com/
+x-amazon-apigateway-request-validators:
+  "Validate body":
+    validateRequestBody: true
+    validateRequestParameters: false
+  "Validate query string parameters and headers":
+    validateRequestBody: false
+    validateRequestParameters: true
+  "Validate body, query string parameters, and headers":
+    validateRequestBody: true
+    validateRequestParameters: true
+
+
