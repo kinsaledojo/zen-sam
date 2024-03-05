@@ -1,13 +1,13 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
+import { Metrics } from '@aws-lambda-powertools/metrics';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 
-const awsLambdaPowertoolsVersion = '1.5.0';
+const awsLambdaPowertoolsVersion = '2.0.1';
 
 const defaultValues = {
     region: 'eu-west-1',
-    executionEnv: process.env.AWS_EXECUTION_ENV || 'N/A',
+    executionEnv: process.env.AWS_EXECUTION_ENV ?? 'N/A',
 };
 
 const logger = new Logger({
@@ -30,7 +30,7 @@ const tracer = new Tracer();
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
  * @param {APIGatewayProxyEvent} event - API Gateway Lambda Proxy Input Format
- * @param {Context} object - API Gateway Lambda $context variable
+ * @param {Context} context - API Gateway Lambda $context variable
  *
  * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
  * @returns {APIGatewayProxyResult} object - API Gateway Lambda Proxy Output Format

@@ -65,13 +65,13 @@ describe('Unit test for app handler', function () {
             getRemainingTimeInMillis: function (): number {
                 throw new Error('Function not implemented.');
             },
-            done: function (error?: Error, result?: any): void {
-                throw new Error('Function not implemented.');
+            done: function (error?: Error): void {
+                throw new Error('Function not implemented.' + error);
             },
             fail: function (error: string | Error): void {
-                throw new Error('Function not implemented.');
+                throw new Error('Function not implemented.' + error);
             },
-            succeed: function (messageOrObject: any): void {
+            succeed: function (): void {
                 throw new Error('Function not implemented.');
             },
         };
